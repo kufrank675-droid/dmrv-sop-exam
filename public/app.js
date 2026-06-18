@@ -223,6 +223,7 @@ const state = {
 };
 
 const ADMIN_PASSWORD = "DMRV2026";
+const IS_STATIC_HOST = window.location.hostname.endsWith("github.io") || window.location.protocol === "file:";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -238,6 +239,9 @@ function localized(value) {
 }
 
 async function api(path, options = {}) {
+  if (IS_STATIC_HOST) {
+    return staticApiFallback(path, options, new Error("Static host fallback"));
+  }
   try {
     const response = await fetch(path, {
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
