@@ -70,6 +70,11 @@ const i18n = {
     memoryTip: "口诀",
     correctFeedback: "回答正确",
     reviewFeedback: "需要复盘",
+    confirmAnswer: "确定本题",
+    confirmHint: "选择答案后，点击确定本题再查看答案和解析。",
+    confirmedAnswer: "已确认",
+    unconfirmed: "待确认",
+    unconfirmedSubmit: "还有题目已选择但未确认，请先点击“确定本题”。",
     diagramQuestion: "题干",
     diagramSop: "SOP定位",
     diagramAction: "正确动作",
@@ -173,6 +178,11 @@ const i18n = {
     memoryTip: "Memory tip",
     correctFeedback: "Correct",
     reviewFeedback: "Review needed",
+    confirmAnswer: "Confirm Answer",
+    confirmHint: "Choose an option, then confirm this question to view the answer and explanation.",
+    confirmedAnswer: "Confirmed",
+    unconfirmed: "Pending confirmation",
+    unconfirmedSubmit: "Some selected answers are not confirmed. Confirm them before submitting.",
     diagramQuestion: "Prompt",
     diagramSop: "SOP Location",
     diagramAction: "Correct action",
@@ -216,6 +226,7 @@ const state = {
   activeQuestions: [],
   currentIndex: 0,
   answers: {},
+  confirmedAnswers: {},
   testCategory: localStorage.getItem("dmrv-test-category") || "all",
   adminUnlocked: sessionStorage.getItem("dmrv-admin-unlocked") === "true",
   startedAt: null,
@@ -443,6 +454,7 @@ function startSession(mode = state.mode, reset = true) {
   if (reset) {
     state.currentIndex = 0;
     state.answers = {};
+    state.confirmedAnswers = {};
     state.startedAt = Date.now();
     $("#resultPanel").hidden = true;
     setView("exam");
@@ -546,6 +558,7 @@ function renderQuestion() {
 
   const question = state.activeQuestions[state.currentIndex];
   const selected = state.answers[question.id] || [];
+  const isConfirmed = Boolean(state.confirmedAnswers[question.id]);
   const category = localized(question.category) || "General";
   area.innerHTML = `
     <article class="question-card">
@@ -556,6 +569,7 @@ function renderQuestion() {
           <div class="question-meta">
             <span>${t("typeLabel")}: ${question.type === "multiple" ? t("multiple") : t("single")}</span>
             <span>${t("chapterLabel")}: ${escapeHtml(category)}</span>
+            ${selected.length ? `<span>${isConfirmed ? t("confirmedAnswer") : t("unconfirmed")}</span>` : ""}
           </div>
         </div>
         <span class="pill">${question.type === "multiple" ? t("multiple") : t("single")}</span>
@@ -568,13 +582,20 @@ function renderQuestion() {
           </button>
         `).join("")}
       </div>
-      ${selected.length ? renderLearningPanel(question, selected) : ""}
+      ${selected.length && !isConfirmed ? `
+        <div class="confirm-strip">
+          <span>${t("confirmHint")}</span>
+          <button class="btn primary" data-confirm-question><i data-lucide="check" aria-hidden="true"></i><span>${t("confirmAnswer")}</span></button>
+        </div>
+      ` : ""}
+      ${isConfirmed ? renderLearningPanel(question, selected) : ""}
     </article>
   `;
 
   $$(".option").forEach((button) => {
     button.addEventListener("click", () => chooseOption(question, button.dataset.option));
   });
+  $("[data-confirm-question]")?.addEventListener("click", () => confirmQuestion(question));
   renderQuestionRail();
   renderIcons();
 }
@@ -663,9 +684,10 @@ function renderQuestionRail() {
   if (!rail) return;
   rail.innerHTML = state.activeQuestions.map((question, index) => {
     const isCurrent = index === state.currentIndex;
-    const isAnswered = Boolean(state.answers[question.id]?.length);
+    const isPicked = Boolean(state.answers[question.id]?.length);
+    const isAnswered = Boolean(state.confirmedAnswers[question.id]);
     return `
-      <button class="rail-dot ${isCurrent ? "is-current" : ""} ${isAnswered ? "is-answered" : ""}" data-index="${index}" aria-label="${t("question")} ${index + 1}, ${isAnswered ? t("answered") : t("pending")}">
+      <button class="rail-dot ${isCurrent ? "is-current" : ""} ${isPicked && !isAnswered ? "is-picked" : ""} ${isAnswered ? "is-answered" : ""}" data-index="${index}" aria-label="${t("question")} ${index + 1}, ${isAnswered ? t("answered") : t("pending")}">
         ${index + 1}
       </button>
     `;
@@ -688,6 +710,13 @@ function chooseOption(question, optionId) {
   } else {
     state.answers[question.id] = [optionId];
   }
+  delete state.confirmedAnswers[question.id];
+  renderQuestion();
+}
+
+function confirmQuestion(question) {
+  if (!state.answers[question.id]?.length) return;
+  state.confirmedAnswers[question.id] = true;
   renderQuestion();
 }
 
@@ -704,6 +733,15 @@ async function submitExam() {
   if (!testerName) {
     window.alert(t("nameRequired"));
     $("#userName").focus();
+    return;
+  }
+  const unconfirmed = state.activeQuestions.filter((question) => {
+    return state.answers[question.id]?.length && !state.confirmedAnswers[question.id];
+  });
+  if (unconfirmed.length) {
+    window.alert(t("unconfirmedSubmit"));
+    state.currentIndex = state.activeQuestions.findIndex((question) => question.id === unconfirmed[0].id);
+    renderQuestion();
     return;
   }
   const missing = state.activeQuestions.filter((question) => !state.answers[question.id]?.length);
@@ -769,6 +807,7 @@ function renderResult(result) {
 function redoSession() {
   state.currentIndex = 0;
   state.answers = {};
+  state.confirmedAnswers = {};
   state.startedAt = Date.now();
   $("#resultPanel").hidden = true;
   restartTimer();

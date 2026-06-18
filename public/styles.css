@@ -675,6 +675,25 @@ a:focus-visible {
   background: var(--surface-2);
 }
 
+.confirm-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.confirm-strip span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
 .learning-head {
   display: flex;
   align-items: center;
@@ -810,6 +829,11 @@ a:focus-visible {
 .option.is-selected .option-key {
   background: var(--primary);
   color: #fff;
+}
+
+.rail-dot.is-picked {
+  color: oklch(0.42 0.12 78);
+  background: oklch(0.96 0.04 78);
 }
 
 .exam-actions {
@@ -1231,6 +1255,7 @@ a:focus-visible {
 
   .question-top,
   .bank-card footer,
+  .confirm-strip,
   .ops-panel header,
   .result-score,
   .review-actions {
