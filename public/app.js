@@ -1,8 +1,8 @@
 const i18n = {
   zh: {
     brandSubtitle: "在线考核题库",
-    navDashboard: "工作台",
-    navExam: "模拟考试",
+    navDashboard: "管理工作台",
+    navExam: "章节测试",
     navBank: "题库管理",
     navResults: "成绩记录",
     platformLabel: "DMRV 平台入口",
@@ -11,7 +11,7 @@ const i18n = {
     nameLabel: "测试者姓名",
     namePlaceholder: "请输入姓名",
     heroEyebrow: "可嵌入 DMRV 的答题模块",
-    heroTitle: "把维护 SOP 题库转成线上测评、练习和审计记录。",
+    heroTitle: "把维护 SOP 题库转成分章节测试和审计记录。",
     heroText: "当前版本支持题库 API、成绩留痕、中英文切换和 JSON 导入，后续可接入 DMRV 单点登录与权限系统。",
     readinessLabel: "题库状态",
     readinessText: "等待首轮成绩",
@@ -23,12 +23,8 @@ const i18n = {
     metricRecords: "成绩记录",
     metricAvg: "平均得分",
     metricLang: "语言",
-    startPractice: "开始练习",
-    startExam: "开始考试",
     importBank: "导入题库",
-    modePractice: "练习",
-    modeExam: "考试",
-    modeReview: "错题复盘",
+    modeTest: "章节测试",
     prev: "上一题",
     next: "下一题",
     submit: "提交",
@@ -41,17 +37,24 @@ const i18n = {
     typeAll: "全部",
     chapterLabel: "章节",
     chapterAll: "全部章节",
-    practiceChapter: "练习章节",
+    testChapter: "测试章节",
     exportBank: "导出",
     exportResults: "导出成绩",
     resultsEyebrow: "审计留痕",
     resultsTitle: "最近成绩记录",
     adminSummary: "管理汇总",
+    adminOnly: "管理人员入口",
+    adminTitle: "输入管理口令后查看工作台",
+    adminText: "工作台用于导入题库、查看所有成绩记录和统计成绩分布。",
+    adminPassword: "管理口令",
+    unlockAdmin: "进入工作台",
+    adminDenied: "管理口令不正确。",
     avgAccuracy: "平均正确率",
     avgCorrectCount: "平均正确数量",
     excellentCount: "优秀人数",
     passedCount: "及格人数",
     retakeCount: "需重做人数",
+    scoreDistribution: "成绩分布",
     refresh: "刷新",
     single: "单选",
     multiple: "多选",
@@ -88,7 +91,6 @@ const i18n = {
     noQuestions: "暂无题目，请先导入题库。",
     noResults: "暂无成绩记录。",
     noExportResults: "暂无成绩可导出。",
-    noWrongQuestions: "本次没有错题。",
     saved: "题库已保存。",
     imported: "题库已导入，请点击保存。",
     importInvalid: "导入失败：JSON 必须是数组，或包含 questions 数组。",
@@ -97,14 +99,13 @@ const i18n = {
     langName: "中文",
     guest: "访客",
     duration: "用时",
-    redo: "重做",
-    reviewWrong: "错题复盘",
+    redo: "重考",
     wrongCount: "错题"
   },
   en: {
     brandSubtitle: "Online Assessment Bank",
-    navDashboard: "Dashboard",
-    navExam: "Exam",
+    navDashboard: "Admin Workbench",
+    navExam: "Chapter Test",
     navBank: "Question Bank",
     navResults: "Results",
     platformLabel: "DMRV Platform Entry",
@@ -113,7 +114,7 @@ const i18n = {
     nameLabel: "Tester Name",
     namePlaceholder: "Enter name",
     heroEyebrow: "Embeddable DMRV assessment module",
-    heroTitle: "Turn maintenance SOP questions into online tests, practice, and audit records.",
+    heroTitle: "Turn maintenance SOP questions into chapter tests and audit records.",
     heroText: "This version supports question APIs, result traces, Chinese-English switching, and JSON import. It can later connect to DMRV SSO and permissions.",
     readinessLabel: "Bank Status",
     readinessText: "Waiting for first score",
@@ -125,12 +126,8 @@ const i18n = {
     metricRecords: "Records",
     metricAvg: "Average Score",
     metricLang: "Language",
-    startPractice: "Start Practice",
-    startExam: "Start Exam",
     importBank: "Import Bank",
-    modePractice: "Practice",
-    modeExam: "Exam",
-    modeReview: "Wrong Review",
+    modeTest: "Chapter Test",
     prev: "Previous",
     next: "Next",
     submit: "Submit",
@@ -143,17 +140,24 @@ const i18n = {
     typeAll: "All",
     chapterLabel: "Chapter",
     chapterAll: "All Chapters",
-    practiceChapter: "Practice Chapter",
+    testChapter: "Test Chapter",
     exportBank: "Export",
     exportResults: "Export Results",
     resultsEyebrow: "Audit Trail",
     resultsTitle: "Recent Results",
     adminSummary: "Admin Summary",
+    adminOnly: "Admin Entry",
+    adminTitle: "Enter the admin passcode to view the workbench",
+    adminText: "The workbench imports question banks, reviews all result records, and summarizes score distribution.",
+    adminPassword: "Admin Passcode",
+    unlockAdmin: "Enter Workbench",
+    adminDenied: "Incorrect admin passcode.",
     avgAccuracy: "Average Accuracy",
     avgCorrectCount: "Average Correct",
     excellentCount: "Excellent Count",
     passedCount: "Passed Count",
     retakeCount: "Retake Count",
+    scoreDistribution: "Score Distribution",
     refresh: "Refresh",
     single: "Single Choice",
     multiple: "Multiple Choice",
@@ -190,7 +194,6 @@ const i18n = {
     noQuestions: "No questions yet. Import a question bank first.",
     noResults: "No result records yet.",
     noExportResults: "No results to export.",
-    noWrongQuestions: "No wrong answers in this result.",
     saved: "Question bank saved.",
     imported: "Question bank imported. Click save to persist it.",
     importInvalid: "Import failed: JSON must be an array or contain a questions array.",
@@ -199,25 +202,27 @@ const i18n = {
     langName: "English",
     guest: "Guest",
     duration: "Duration",
-    redo: "Redo",
-    reviewWrong: "Review Wrong",
+    redo: "Retake",
     wrongCount: "Wrong"
   }
 };
 
 const state = {
   lang: localStorage.getItem("dmrv-lang") || "zh",
-  view: "dashboard",
-  mode: "practice",
+  view: "exam",
+  mode: "test",
   questions: [],
   results: [],
   activeQuestions: [],
   currentIndex: 0,
   answers: {},
-  practiceCategory: localStorage.getItem("dmrv-practice-category") || "all",
+  testCategory: localStorage.getItem("dmrv-test-category") || "all",
+  adminUnlocked: sessionStorage.getItem("dmrv-admin-unlocked") === "true",
   startedAt: null,
   timerHandle: null
 };
+
+const ADMIN_PASSWORD = "DMRV2026";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -280,12 +285,12 @@ function readLocalResults() {
   }
 }
 
-function normalizeMode(mode) {
-  return ["practice", "exam", "review"].includes(mode) ? mode : "exam";
+function normalizeMode() {
+  return "test";
 }
 
 function modeLabel(mode) {
-  return mode === "practice" ? t("modePractice") : mode === "review" ? t("modeReview") : t("modeExam");
+  return t("modeTest");
 }
 
 function resultLevel(score) {
@@ -340,7 +345,7 @@ async function loadData() {
   ]);
   state.questions = questionPayload.questions || [];
   state.results = resultPayload.results || [];
-  if (!state.activeQuestions.length) startSession("practice", false);
+  if (!state.activeQuestions.length) startSession("test", false);
   renderAll();
 }
 
@@ -357,23 +362,54 @@ function setLanguage(lang) {
 }
 
 function setView(view) {
+  if (requiresAdmin(view) && !state.adminUnlocked) {
+    view = "dashboard";
+  }
   state.view = view;
   $$(".view").forEach((section) => section.classList.remove("is-active"));
   $(`#${view}View`)?.classList.add("is-active");
   $$(".nav-item").forEach((button) => button.classList.toggle("is-active", button.dataset.view === view));
   if (view === "results") refreshResults();
+  renderAdminAccess();
   renderIcons();
 }
 
+function requiresAdmin(view) {
+  return ["dashboard", "bank", "results"].includes(view);
+}
+
+function renderAdminAccess() {
+  const gate = $("#adminGate");
+  const content = $("#adminContent");
+  if (!gate || !content) return;
+  gate.hidden = state.adminUnlocked;
+  content.hidden = !state.adminUnlocked;
+  $$("[data-admin-nav]").forEach((button) => {
+    button.hidden = !state.adminUnlocked;
+  });
+}
+
+function unlockAdmin() {
+  const input = $("#adminPasswordInput");
+  if (input.value === ADMIN_PASSWORD) {
+    state.adminUnlocked = true;
+    sessionStorage.setItem("dmrv-admin-unlocked", "true");
+    input.value = "";
+    renderAdminAccess();
+    renderAll();
+    return;
+  }
+  window.alert(t("adminDenied"));
+  input.focus();
+}
+
 function setMode(mode) {
-  state.mode = mode;
-  syncModeTabs();
-  startSession(mode, true);
+  state.mode = "test";
+  startSession("test", true);
 }
 
 function syncModeTabs() {
-  $$(".tab").forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
-  $(".practice-filter")?.classList.toggle("is-muted", state.mode !== "practice");
+  $(".chapter-filter")?.classList.remove("is-muted");
 }
 
 function shuffle(items) {
@@ -392,13 +428,11 @@ function getCategories() {
 }
 
 function startSession(mode = state.mode, reset = true) {
-  state.mode = mode;
-  if (mode === "exam") {
-    state.activeQuestions = shuffle(state.questions).slice(0, Math.min(10, state.questions.length));
-  } else if (mode === "practice") {
-    state.activeQuestions = state.practiceCategory === "all"
+  state.mode = normalizeMode(mode);
+  if (state.mode === "test") {
+    state.activeQuestions = state.testCategory === "all"
       ? [...state.questions]
-      : state.questions.filter((question) => categoryValue(question) === state.practiceCategory);
+      : state.questions.filter((question) => categoryValue(question) === state.testCategory);
   } else {
     state.activeQuestions = [...state.questions];
   }
@@ -495,7 +529,7 @@ function renderDashboardDetails() {
 }
 
 function renderQuestion() {
-  renderPracticeCategoryOptions();
+  renderTestCategoryOptions();
   const area = $("#questionArea");
   const total = state.activeQuestions.length;
   $("#progress").textContent = `${Math.min(state.currentIndex + 1, total)}/${total}`;
@@ -530,7 +564,7 @@ function renderQuestion() {
           </button>
         `).join("")}
       </div>
-      ${state.mode === "practice" && selected.length ? renderLearningPanel(question, selected) : ""}
+      ${selected.length ? renderLearningPanel(question, selected) : ""}
     </article>
   `;
 
@@ -541,14 +575,14 @@ function renderQuestion() {
   renderIcons();
 }
 
-function renderPracticeCategoryOptions() {
-  const select = $("#practiceCategoryFilter");
+function renderTestCategoryOptions() {
+  const select = $("#testCategoryFilter");
   if (!select) return;
   const categories = getCategories();
-  const nextValue = state.practiceCategory === "all" || categories.includes(state.practiceCategory)
-    ? state.practiceCategory
+  const nextValue = state.testCategory === "all" || categories.includes(state.testCategory)
+    ? state.testCategory
     : "all";
-  state.practiceCategory = nextValue;
+  state.testCategory = nextValue;
   select.innerHTML = `
     <option value="all">${t("chapterAll")}</option>
     ${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}
@@ -651,19 +685,6 @@ function chooseOption(question, optionId) {
     state.answers[question.id] = [optionId];
   }
   renderQuestion();
-  if (question.type === "single" && state.mode === "exam") autoAdvanceSingleChoice(question.id);
-}
-
-function autoAdvanceSingleChoice(questionId) {
-  const indexAtClick = state.currentIndex;
-  window.setTimeout(() => {
-    const stillOnSameQuestion = state.activeQuestions[state.currentIndex]?.id === questionId;
-    const hasNextQuestion = indexAtClick < state.activeQuestions.length - 1;
-    if (stillOnSameQuestion && hasNextQuestion) {
-      state.currentIndex = indexAtClick + 1;
-      renderQuestion();
-    }
-  }, 180);
 }
 
 function moveQuestion(direction) {
@@ -720,7 +741,6 @@ function renderResult(result) {
     </div>
     <div class="review-actions">
       <button class="btn ${result.score < 80 ? "primary" : "secondary"}" data-redo-session><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
-      <button class="btn primary" data-review-wrong ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")} (${wrongCount})</span></button>
     </div>
     ${state.activeQuestions.map((question, index) => {
       const detail = detailById.get(question.id);
@@ -739,7 +759,6 @@ function renderResult(result) {
     }).join("")}
   `;
   panel.querySelector("[data-redo-session]")?.addEventListener("click", redoSession);
-  panel.querySelector("[data-review-wrong]")?.addEventListener("click", () => startWrongReview(result));
   renderIcons();
 }
 
@@ -761,28 +780,6 @@ function redoFromResult(result) {
   state.activeQuestions = questions.length ? questions : [...state.questions];
   syncModeTabs();
   redoSession();
-}
-
-function startWrongReview(result) {
-  const wrongIds = (result.details || [])
-    .filter((item) => !item.isCorrect)
-    .map((item) => item.questionId);
-  const questions = wrongIds.map((id) => state.questions.find((question) => question.id === id)).filter(Boolean);
-  if (!questions.length) {
-    window.alert(t("noWrongQuestions"));
-    return;
-  }
-  state.mode = "review";
-  state.activeQuestions = questions;
-  state.currentIndex = 0;
-  state.answers = {};
-  state.startedAt = Date.now();
-  $("#resultPanel").hidden = true;
-  syncModeTabs();
-  restartTimer();
-  renderQuestion();
-  renderStats();
-  setView("exam");
 }
 
 function renderBank() {
@@ -892,7 +889,6 @@ function renderResults() {
       <span class="level-badge ${level.className}">${level.label}</span>
       <div class="row-actions">
         <button class="btn ${result.score < 80 ? "primary" : "secondary"} small" data-redo-result="${escapeHtml(result.id)}"><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
-        <button class="btn secondary small" data-review-result="${escapeHtml(result.id)}" ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")}</span></button>
       </div>
     </article>
   `;
@@ -901,12 +897,6 @@ function renderResults() {
     button.addEventListener("click", () => {
       const result = state.results.find((item) => item.id === button.dataset.redoResult);
       if (result) redoFromResult(result);
-    });
-  });
-  $$("[data-review-result]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const result = state.results.find((item) => item.id === button.dataset.reviewResult);
-      if (result) startWrongReview(result);
     });
   });
   renderIcons();
@@ -951,6 +941,23 @@ function renderResultsSummary() {
       <span>${t("retakeCount")}</span>
       <strong>${retake}</strong>
     </article>
+    <div class="distribution-panel">
+      <div class="distribution-title">
+        <span>${t("scoreDistribution")}</span>
+        <b>${t("standardHint")}</b>
+      </div>
+      <div class="distribution-bars">
+        <div class="distribution-bar excellent" style="--size:${(excellent / totalRecords) * 100}%">
+          <span>${t("excellent")}</span><b>${excellent}</b>
+        </div>
+        <div class="distribution-bar passed" style="--size:${(passed / totalRecords) * 100}%">
+          <span>${t("passed")}</span><b>${passed}</b>
+        </div>
+        <div class="distribution-bar retake" style="--size:${(retake / totalRecords) * 100}%">
+          <span>${t("retakeRequired")}</span><b>${retake}</b>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -996,6 +1003,7 @@ function csvCell(value) {
 }
 
 function renderAll() {
+  renderAdminAccess();
   renderStats();
   renderQuestion();
   renderBank();
@@ -1021,7 +1029,7 @@ function bindEvents() {
   $$(".nav-item").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
   $$(".segment").forEach((button) => button.addEventListener("click", () => setLanguage(button.dataset.lang)));
   $$(".tab").forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode)));
-  $$("[data-start]").forEach((button) => button.addEventListener("click", () => setMode(button.dataset.start)));
+  $$("[data-start]").forEach((button) => button.addEventListener("click", () => setMode("test")));
   $$("[data-view-shortcut]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.viewShortcut)));
 
   $("#prevQuestion").addEventListener("click", () => moveQuestion(-1));
@@ -1030,15 +1038,20 @@ function bindEvents() {
   $("#searchInput").addEventListener("input", renderBank);
   $("#typeFilter").addEventListener("change", renderBank);
   $("#categoryFilter").addEventListener("change", renderBank);
-  $("#practiceCategoryFilter").addEventListener("change", (event) => {
-    state.practiceCategory = event.target.value;
-    localStorage.setItem("dmrv-practice-category", state.practiceCategory);
-    setMode("practice");
+  $("#testCategoryFilter").addEventListener("change", (event) => {
+    state.testCategory = event.target.value;
+    localStorage.setItem("dmrv-test-category", state.testCategory);
+    setMode("test");
   });
   $("#saveBank").addEventListener("click", saveBank);
   $("#exportBank").addEventListener("click", exportBank);
   $("#exportResults").addEventListener("click", exportResults);
+  $("#dashboardExportResults").addEventListener("click", exportResults);
   $("#refreshResults").addEventListener("click", refreshResults);
+  $("#unlockAdmin").addEventListener("click", unlockAdmin);
+  $("#adminPasswordInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") unlockAdmin();
+  });
   $("#importFile").addEventListener("change", (event) => {
     const [file] = event.target.files;
     if (file) importBank(file);

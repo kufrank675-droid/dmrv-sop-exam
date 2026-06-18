@@ -22,19 +22,19 @@
           </div>
         </div>
         <nav class="nav" aria-label="Primary">
-          <button class="nav-item is-active" data-view="dashboard">
-            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
-            <span data-i18n="navDashboard">工作台</span>
-          </button>
-          <button class="nav-item" data-view="exam">
+          <button class="nav-item is-active" data-view="exam">
             <i data-lucide="clipboard-check" aria-hidden="true"></i>
-            <span data-i18n="navExam">模拟考试</span>
+            <span data-i18n="navExam">章节测试</span>
           </button>
-          <button class="nav-item" data-view="bank">
+          <button class="nav-item" data-view="dashboard">
+            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+            <span data-i18n="navDashboard">管理工作台</span>
+          </button>
+          <button class="nav-item" data-view="bank" data-admin-nav hidden>
             <i data-lucide="database" aria-hidden="true"></i>
             <span data-i18n="navBank">题库管理</span>
           </button>
-          <button class="nav-item" data-view="results">
+          <button class="nav-item" data-view="results" data-admin-nav hidden>
             <i data-lucide="bar-chart-3" aria-hidden="true"></i>
             <span data-i18n="navResults">成绩记录</span>
           </button>
@@ -63,81 +63,92 @@
           </div>
         </header>
 
-        <section class="view is-active" id="dashboardView">
-          <div class="hero-panel">
+        <section class="view" id="dashboardView">
+          <div class="admin-gate" id="adminGate" hidden>
             <div>
-              <p class="eyebrow" data-i18n="heroEyebrow">可嵌入 DMRV 的答题模块</p>
-              <h2 data-i18n="heroTitle">把维护 SOP 题库转成线上测评、练习和审计记录。</h2>
-              <p data-i18n="heroText">当前版本支持题库 API、成绩留痕、中英文切换和 JSON 导入，后续可接入 DMRV 单点登录与权限系统。</p>
+              <p class="eyebrow" data-i18n="adminOnly">管理人员入口</p>
+              <h2 data-i18n="adminTitle">输入管理口令后查看工作台</h2>
+              <p data-i18n="adminText">工作台用于导入题库、查看所有成绩记录和统计成绩分布。</p>
             </div>
-            <div class="readiness-panel">
-              <span data-i18n="readinessLabel">题库状态</span>
-              <strong id="heroScore">--</strong>
-              <small data-i18n="readinessText">等待首轮成绩</small>
+            <label class="field">
+              <span data-i18n="adminPassword">管理口令</span>
+              <input id="adminPasswordInput" name="admin-password" type="password" autocomplete="off" />
+            </label>
+            <button class="btn primary" id="unlockAdmin"><i data-lucide="lock-keyhole-open" aria-hidden="true"></i><span data-i18n="unlockAdmin">进入工作台</span></button>
+          </div>
+
+          <div id="adminContent">
+            <div class="hero-panel">
+              <div>
+                <p class="eyebrow" data-i18n="heroEyebrow">可嵌入 DMRV 的答题模块</p>
+                <h2 data-i18n="heroTitle">把维护 SOP 题库转成分章节测试和审计记录。</h2>
+                <p data-i18n="heroText">当前版本支持题库 API、成绩留痕、中英文切换和 JSON 导入，后续可接入 DMRV 单点登录与权限系统。</p>
+              </div>
+              <div class="readiness-panel">
+                <span data-i18n="readinessLabel">题库状态</span>
+                <strong id="heroScore">--</strong>
+                <small data-i18n="readinessText">等待首轮成绩</small>
+              </div>
             </div>
-          </div>
 
-          <div class="metrics">
-            <article>
-              <span data-i18n="metricQuestions">题目数量</span>
-              <strong id="questionCount">0</strong>
-            </article>
-            <article>
-              <span data-i18n="metricRecords">成绩记录</span>
-              <strong id="resultCount">0</strong>
-            </article>
-            <article>
-              <span data-i18n="metricAvg">平均得分</span>
-              <strong id="avgScore">--</strong>
-            </article>
-            <article>
-              <span data-i18n="metricLang">语言</span>
-              <strong id="currentLang">中文</strong>
-            </article>
-          </div>
+            <div class="metrics">
+              <article>
+                <span data-i18n="metricQuestions">题目数量</span>
+                <strong id="questionCount">0</strong>
+              </article>
+              <article>
+                <span data-i18n="metricRecords">成绩记录</span>
+                <strong id="resultCount">0</strong>
+              </article>
+              <article>
+                <span data-i18n="metricAvg">平均得分</span>
+                <strong id="avgScore">--</strong>
+              </article>
+              <article>
+                <span data-i18n="metricLang">语言</span>
+                <strong id="currentLang">中文</strong>
+              </article>
+            </div>
 
-          <div class="quick-grid">
-            <button class="quick-action" data-start="practice">
-              <i data-lucide="play-circle" aria-hidden="true"></i>
-              <span data-i18n="startPractice">开始练习</span>
-            </button>
-            <button class="quick-action" data-start="exam">
-              <i data-lucide="timer" aria-hidden="true"></i>
-              <span data-i18n="startExam">开始考试</span>
-            </button>
-            <button class="quick-action" data-view-shortcut="bank">
-              <i data-lucide="upload" aria-hidden="true"></i>
-              <span data-i18n="importBank">导入题库</span>
-            </button>
-          </div>
+            <div class="quick-grid">
+              <button class="quick-action" data-view-shortcut="bank">
+                <i data-lucide="upload" aria-hidden="true"></i>
+                <span data-i18n="importBank">导入题库</span>
+              </button>
+              <button class="quick-action" data-view-shortcut="results">
+                <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+                <span data-i18n="navResults">成绩记录</span>
+              </button>
+              <button class="quick-action" id="dashboardExportResults">
+                <i data-lucide="download" aria-hidden="true"></i>
+                <span data-i18n="exportResults">导出成绩</span>
+              </button>
+            </div>
 
-          <div class="dashboard-grid">
-            <article class="ops-panel">
-              <header>
-                <h3 data-i18n="sourceTitle">题库来源</h3>
-                <span data-i18n="sourceHint">Word 导入记录</span>
-              </header>
-              <div id="sourceList" class="source-list"></div>
-            </article>
-            <article class="ops-panel">
-              <header>
-                <h3 data-i18n="coverageTitle">章节覆盖</h3>
-                <span data-i18n="coverageHint">按 SOP 章节统计</span>
-              </header>
-              <div id="categoryList" class="coverage-list"></div>
-            </article>
+            <div class="dashboard-grid">
+              <article class="ops-panel">
+                <header>
+                  <h3 data-i18n="sourceTitle">题库来源</h3>
+                  <span data-i18n="sourceHint">Word 导入记录</span>
+                </header>
+                <div id="sourceList" class="source-list"></div>
+              </article>
+              <article class="ops-panel">
+                <header>
+                  <h3 data-i18n="coverageTitle">章节覆盖</h3>
+                  <span data-i18n="coverageHint">按 SOP 章节统计</span>
+                </header>
+                <div id="categoryList" class="coverage-list"></div>
+              </article>
+            </div>
           </div>
         </section>
 
-        <section class="view" id="examView">
+        <section class="view is-active" id="examView">
           <div class="toolbar">
-            <div class="tabs" role="tablist">
-              <button class="tab is-active" data-mode="practice" data-i18n="modePractice">练习</button>
-              <button class="tab" data-mode="exam" data-i18n="modeExam">考试</button>
-            </div>
-            <label class="field select-field practice-filter">
-              <span data-i18n="practiceChapter">练习章节</span>
-              <select id="practiceCategoryFilter" name="practice-category-filter">
+            <label class="field select-field chapter-filter">
+              <span data-i18n="testChapter">测试章节</span>
+              <select id="testCategoryFilter" name="test-category-filter">
                 <option value="all" data-i18n="chapterAll">全部章节</option>
               </select>
             </label>

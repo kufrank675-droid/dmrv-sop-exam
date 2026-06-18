@@ -19,8 +19,8 @@ function normalizeBody(body) {
   return body;
 }
 
-function normalizeMode(mode) {
-  return ["practice", "exam", "review"].includes(mode) ? mode : "exam";
+function normalizeMode() {
+  return "test";
 }
 
 function grade(questions, answers, questionIds) {

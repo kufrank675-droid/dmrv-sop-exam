@@ -335,6 +335,34 @@ a:focus-visible {
   box-shadow: var(--shadow);
 }
 
+.admin-gate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px auto;
+  gap: 16px;
+  align-items: end;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.admin-gate h2,
+.admin-gate p {
+  margin: 0;
+}
+
+.admin-gate h2 {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.admin-gate p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .hero-panel p:last-child {
   max-width: 76ch;
   margin: 12px 0 0;
@@ -514,11 +542,11 @@ a:focus-visible {
   flex-wrap: wrap;
 }
 
-.practice-filter {
+.chapter-filter {
   margin-right: auto;
 }
 
-.practice-filter.is-muted {
+.chapter-filter.is-muted {
   opacity: 0.56;
 }
 
@@ -911,6 +939,74 @@ a:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.distribution-panel {
+  grid-column: 1 / -1;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.distribution-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.distribution-title span {
+  margin: 0;
+}
+
+.distribution-title b {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.distribution-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.distribution-bar {
+  position: relative;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow: hidden;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.distribution-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: max(var(--size), 3px);
+  opacity: 0.18;
+}
+
+.distribution-bar.excellent::before {
+  background: oklch(0.52 0.15 165);
+}
+
+.distribution-bar.passed::before {
+  background: var(--primary);
+}
+
+.distribution-bar.retake::before {
+  background: oklch(0.58 0.18 28);
+}
+
+.distribution-bar span,
+.distribution-bar b {
+  position: relative;
+  margin: 0;
+}
+
 .bank-card {
   padding: 16px;
   content-visibility: auto;
@@ -1058,6 +1154,7 @@ a:focus-visible {
   }
 
   .hero-panel,
+  .admin-gate,
   .dashboard-grid,
   .exam-layout {
     grid-template-columns: 1fr;
@@ -1108,7 +1205,7 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .practice-filter {
+  .chapter-filter {
     margin-right: 0;
   }
 
