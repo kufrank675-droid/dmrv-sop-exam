@@ -515,6 +515,19 @@ function chooseOption(question, optionId) {
     state.answers[question.id] = [optionId];
   }
   renderQuestion();
+  if (question.type === "single") autoAdvanceSingleChoice(question.id);
+}
+
+function autoAdvanceSingleChoice(questionId) {
+  const indexAtClick = state.currentIndex;
+  window.setTimeout(() => {
+    const stillOnSameQuestion = state.activeQuestions[state.currentIndex]?.id === questionId;
+    const hasNextQuestion = indexAtClick < state.activeQuestions.length - 1;
+    if (stillOnSameQuestion && hasNextQuestion) {
+      state.currentIndex = indexAtClick + 1;
+      renderQuestion();
+    }
+  }, 180);
 }
 
 function moveQuestion(direction) {
