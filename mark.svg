@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="DMRV SOP">
+  <rect width="120" height="120" rx="24" fill="#172033"/>
+  <path d="M26 78V37h22c13 0 22 8 22 20s-9 21-22 21H26Z" fill="#4fc3a1"/>
+  <path d="M42 66h7c6 0 10-4 10-9s-4-9-10-9h-7v18Z" fill="#172033"/>
+  <path d="M74 39h20v39H74z" fill="#ffffff"/>
+  <path d="M82 50h21v8H82zM82 65h15v8H82z" fill="#3157d5"/>
+  <circle cx="83" cy="34" r="8" fill="#f4c84f"/>
+</svg>

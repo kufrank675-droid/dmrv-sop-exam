@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f6f8" />
+    <title>DMRV SOP Exam</title>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a href="#mainContent" class="skip-link">Skip to main content</a>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="mark.svg" alt="" width="44" height="44" class="brand-mark" />
+          <div>
+            <strong>DMRV SOP</strong>
+            <span data-i18n="brandSubtitle">在线考核题库</span>
+          </div>
+        </div>
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-item is-active" data-view="exam">
+            <i data-lucide="clipboard-check" aria-hidden="true"></i>
+            <span data-i18n="navExam">章节测试</span>
+          </button>
+          <button class="nav-item" data-view="dashboard">
+            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+            <span data-i18n="navDashboard">管理工作台</span>
+          </button>
+          <button class="nav-item" data-view="bank" data-admin-nav hidden>
+            <i data-lucide="database" aria-hidden="true"></i>
+            <span data-i18n="navBank">题库管理</span>
+          </button>
+          <button class="nav-item" data-view="results" data-admin-nav hidden>
+            <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+            <span data-i18n="navResults">成绩记录</span>
+          </button>
+        </nav>
+        <div class="platform-box">
+          <span data-i18n="platformLabel">DMRV 平台入口</span>
+          <a href="#" id="platformLink">/exam/sop</a>
+        </div>
+      </aside>
+
+      <main class="main" id="mainContent">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" data-i18n="eyebrow">维护管理 SOP</p>
+            <h1 data-i18n="pageTitle">线上答题平台</h1>
+          </div>
+          <div class="top-actions">
+            <label class="field compact">
+              <span data-i18n="nameLabel">测试者姓名</span>
+              <input id="userName" name="exam-user-name" type="text" autocomplete="off" required placeholder="请输入姓名" />
+            </label>
+            <div class="segmented" role="group" aria-label="Language">
+              <button class="segment is-active" data-lang="zh">中</button>
+              <button class="segment" data-lang="en">EN</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="view" id="dashboardView">
+          <div class="admin-gate" id="adminGate" hidden>
+            <div>
+              <p class="eyebrow" data-i18n="adminOnly">管理人员入口</p>
+              <h2 data-i18n="adminTitle">输入管理口令后查看工作台</h2>
+              <p data-i18n="adminText">工作台用于导入题库、查看所有成绩记录和统计成绩分布。</p>
+            </div>
+            <label class="field">
+              <span data-i18n="adminPassword">管理口令</span>
+              <input id="adminPasswordInput" name="admin-password" type="password" autocomplete="off" />
+            </label>
+            <button class="btn primary" id="unlockAdmin"><i data-lucide="lock-keyhole-open" aria-hidden="true"></i><span data-i18n="unlockAdmin">进入工作台</span></button>
+          </div>
+
+          <div id="adminContent">
+            <div class="hero-panel">
+              <div>
+                <p class="eyebrow" data-i18n="heroEyebrow">可嵌入 DMRV 的答题模块</p>
+                <h2 data-i18n="heroTitle">把维护 SOP 题库转成分章节测试和审计记录。</h2>
+                <p data-i18n="heroText">当前版本支持题库 API、成绩留痕、中英文切换和 JSON 导入，后续可接入 DMRV 单点登录与权限系统。</p>
+              </div>
+              <div class="readiness-panel">
+                <span data-i18n="readinessLabel">题库状态</span>
+                <strong id="heroScore">--</strong>
+                <small data-i18n="readinessText">等待首轮成绩</small>
+              </div>
+            </div>
+
+            <div class="metrics">
+              <article>
+                <span data-i18n="metricQuestions">题目数量</span>
+                <strong id="questionCount">0</strong>
+              </article>
+              <article>
+                <span data-i18n="metricRecords">成绩记录</span>
+                <strong id="resultCount">0</strong>
+              </article>
+              <article>
+                <span data-i18n="metricAvg">平均得分</span>
+                <strong id="avgScore">--</strong>
+              </article>
+              <article>
+                <span data-i18n="metricLang">语言</span>
+                <strong id="currentLang">中文</strong>
+              </article>
+            </div>
+
+            <div class="quick-grid">
+              <button class="quick-action" data-view-shortcut="bank">
+                <i data-lucide="upload" aria-hidden="true"></i>
+                <span data-i18n="importBank">导入题库</span>
+              </button>
+              <button class="quick-action" data-view-shortcut="results">
+                <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+                <span data-i18n="navResults">成绩记录</span>
+              </button>
+              <button class="quick-action" id="dashboardExportResults">
+                <i data-lucide="download" aria-hidden="true"></i>
+                <span data-i18n="exportResults">导出成绩</span>
+              </button>
+            </div>
+
+            <div class="dashboard-grid">
+              <article class="ops-panel">
+                <header>
+                  <h3 data-i18n="sourceTitle">题库来源</h3>
+                  <span data-i18n="sourceHint">Word 导入记录</span>
+                </header>
+                <div id="sourceList" class="source-list"></div>
+              </article>
+              <article class="ops-panel">
+                <header>
+                  <h3 data-i18n="coverageTitle">章节覆盖</h3>
+                  <span data-i18n="coverageHint">按 SOP 章节统计</span>
+                </header>
+                <div id="categoryList" class="coverage-list"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view is-active" id="examView">
+          <div class="toolbar">
+            <label class="field select-field chapter-filter">
+              <span data-i18n="testChapter">测试章节</span>
+              <select id="testCategoryFilter" name="test-category-filter">
+                <option value="all" data-i18n="chapterAll">全部章节</option>
+              </select>
+            </label>
+            <div class="exam-meta">
+              <span><i data-lucide="clock-3" aria-hidden="true"></i><b id="timer">00:00</b></span>
+              <span><i data-lucide="list-checks" aria-hidden="true"></i><b id="progress">0/0</b></span>
+            </div>
+          </div>
+          <div class="exam-layout">
+            <aside id="questionRail" class="question-rail" aria-label="Question navigation"></aside>
+            <div id="questionArea" class="question-area"></div>
+          </div>
+          <div class="exam-actions">
+            <button class="btn secondary" id="prevQuestion"><i data-lucide="arrow-left" aria-hidden="true"></i><span data-i18n="prev">上一题</span></button>
+            <button class="btn secondary" id="nextQuestion"><span data-i18n="next">下一题</span><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+            <button class="btn primary" id="submitExam"><i data-lucide="send" aria-hidden="true"></i><span data-i18n="submit">提交</span></button>
+          </div>
+          <div id="resultPanel" class="result-panel" hidden></div>
+        </section>
+
+        <section class="view" id="bankView">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="bankEyebrow">题库管理</p>
+              <h2 data-i18n="bankTitle">维护题目、分类和答案</h2>
+            </div>
+            <button class="btn primary" id="saveBank"><i data-lucide="save" aria-hidden="true"></i><span data-i18n="saveBank">保存题库</span></button>
+          </div>
+          <div class="bank-tools">
+            <label class="field">
+              <span data-i18n="searchLabel">搜索</span>
+              <input id="searchInput" name="question-search" type="search" autocomplete="off" placeholder="SOP / 巡检 / audit…" />
+            </label>
+            <label class="field select-field">
+              <span data-i18n="typeLabel">题型</span>
+              <select id="typeFilter" name="question-type-filter">
+                <option value="all" data-i18n="typeAll">全部</option>
+                <option value="single" data-i18n="single">单选</option>
+                <option value="multiple" data-i18n="multiple">多选</option>
+              </select>
+            </label>
+            <label class="field select-field wide">
+              <span data-i18n="chapterLabel">章节</span>
+              <select id="categoryFilter" name="question-category-filter">
+                <option value="all" data-i18n="chapterAll">全部章节</option>
+              </select>
+            </label>
+            <label class="field">
+              <span data-i18n="importLabel">导入 JSON</span>
+              <input id="importFile" name="question-bank-file" type="file" accept="application/json" autocomplete="off" />
+            </label>
+            <button class="btn secondary" id="exportBank"><i data-lucide="download" aria-hidden="true"></i><span data-i18n="exportBank">导出</span></button>
+          </div>
+          <div id="bankList" class="bank-list"></div>
+        </section>
+
+        <section class="view" id="resultsView">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="resultsEyebrow">审计留痕</p>
+              <h2 data-i18n="resultsTitle">最近成绩记录</h2>
+            </div>
+            <div class="section-actions">
+              <button class="btn secondary" id="exportResults"><i data-lucide="download" aria-hidden="true"></i><span data-i18n="exportResults">导出成绩</span></button>
+              <button class="btn secondary" id="refreshResults"><i data-lucide="refresh-cw" aria-hidden="true"></i><span data-i18n="refresh">刷新</span></button>
+            </div>
+          </div>
+          <div id="resultsSummary" class="results-summary"></div>
+          <div id="resultsList" class="results-list"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
