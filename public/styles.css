@@ -281,6 +281,10 @@ a:focus-visible {
   min-width: 132px;
 }
 
+.select-field.wide select {
+  min-width: 220px;
+}
+
 .segmented,
 .tabs {
   display: inline-grid;
@@ -598,6 +602,27 @@ a:focus-visible {
   font-weight: 850;
 }
 
+.question-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.question-meta span,
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .options {
   display: grid;
   gap: 10px;
@@ -725,6 +750,11 @@ a:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.result-score div {
+  display: grid;
+  gap: 5px;
+}
+
 .bank-tools {
   gap: 12px;
   flex-wrap: wrap;
@@ -769,9 +799,24 @@ a:focus-visible {
   font-weight: 850;
 }
 
+.level-badge.excellent {
+  background: var(--verified-soft);
+  color: oklch(0.34 0.12 165);
+}
+
+.level-badge.passed {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.level-badge.retake {
+  background: oklch(0.95 0.045 28);
+  color: oklch(0.42 0.16 28);
+}
+
 .result-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px 120px auto;
+  grid-template-columns: minmax(0, 1fr) 96px 100px 96px auto;
   gap: 16px;
   align-items: center;
   padding: 14px 16px;
@@ -797,6 +842,8 @@ a:focus-visible {
 
 .row-actions {
   display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
   justify-content: flex-end;
 }
 

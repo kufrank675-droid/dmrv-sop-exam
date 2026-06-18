@@ -8,7 +8,8 @@ const i18n = {
     platformLabel: "DMRV 平台入口",
     eyebrow: "维护管理 SOP",
     pageTitle: "线上答题平台",
-    nameLabel: "姓名",
+    nameLabel: "测试者姓名",
+    namePlaceholder: "请输入姓名",
     heroEyebrow: "可嵌入 DMRV 的答题模块",
     heroTitle: "把维护 SOP 题库转成线上测评、练习和审计记录。",
     heroText: "当前版本支持题库 API、成绩留痕、中英文切换和 JSON 导入，后续可接入 DMRV 单点登录与权限系统。",
@@ -38,6 +39,8 @@ const i18n = {
     importLabel: "导入 JSON",
     typeLabel: "题型",
     typeAll: "全部",
+    chapterLabel: "章节",
+    chapterAll: "全部章节",
     exportBank: "导出",
     exportResults: "导出成绩",
     resultsEyebrow: "审计留痕",
@@ -54,8 +57,16 @@ const i18n = {
     explanation: "解析",
     sopLocation: "SOP位置",
     source: "来源",
+    testTime: "答题时间",
+    tester: "答题人",
     score: "得分",
     accuracy: "正确率",
+    resultLevel: "成绩等级",
+    excellent: "优秀",
+    passed: "及格",
+    retakeRequired: "需重做",
+    retakeHint: "低于 80% 正确率，需要重新做题。",
+    standardHint: "标准：80% 及格，90% 优秀。",
     submitted: "已提交",
     noQuestions: "暂无题目，请先导入题库。",
     noResults: "暂无成绩记录。",
@@ -64,6 +75,7 @@ const i18n = {
     saved: "题库已保存。",
     imported: "题库已导入，请点击保存。",
     importInvalid: "导入失败：JSON 必须是数组，或包含 questions 数组。",
+    nameRequired: "请先填写测试者姓名。",
     unanswered: "还有题目未作答，仍要提交吗？",
     langName: "中文",
     guest: "访客",
@@ -81,7 +93,8 @@ const i18n = {
     platformLabel: "DMRV Platform Entry",
     eyebrow: "Maintenance SOP",
     pageTitle: "Online Assessment Platform",
-    nameLabel: "Name",
+    nameLabel: "Tester Name",
+    namePlaceholder: "Enter name",
     heroEyebrow: "Embeddable DMRV assessment module",
     heroTitle: "Turn maintenance SOP questions into online tests, practice, and audit records.",
     heroText: "This version supports question APIs, result traces, Chinese-English switching, and JSON import. It can later connect to DMRV SSO and permissions.",
@@ -111,6 +124,8 @@ const i18n = {
     importLabel: "Import JSON",
     typeLabel: "Type",
     typeAll: "All",
+    chapterLabel: "Chapter",
+    chapterAll: "All Chapters",
     exportBank: "Export",
     exportResults: "Export Results",
     resultsEyebrow: "Audit Trail",
@@ -127,8 +142,16 @@ const i18n = {
     explanation: "Explanation",
     sopLocation: "SOP Location",
     source: "Source",
+    testTime: "Submitted At",
+    tester: "Tester",
     score: "Score",
     accuracy: "Accuracy",
+    resultLevel: "Result Level",
+    excellent: "Excellent",
+    passed: "Passed",
+    retakeRequired: "Retake Required",
+    retakeHint: "Below 80% accuracy. Retake is required.",
+    standardHint: "Standard: 80% passed, 90% excellent.",
     submitted: "Submitted",
     noQuestions: "No questions yet. Import a question bank first.",
     noResults: "No result records yet.",
@@ -137,6 +160,7 @@ const i18n = {
     saved: "Question bank saved.",
     imported: "Question bank imported. Click save to persist it.",
     importInvalid: "Import failed: JSON must be an array or contain a questions array.",
+    nameRequired: "Enter the tester name first.",
     unanswered: "Some questions are unanswered. Submit anyway?",
     langName: "English",
     guest: "Guest",
@@ -229,6 +253,17 @@ function modeLabel(mode) {
   return mode === "practice" ? t("modePractice") : mode === "review" ? t("modeReview") : t("modeExam");
 }
 
+function resultLevel(score) {
+  const value = Number(score || 0);
+  if (value >= 90) return { key: "excellent", className: "excellent", label: t("excellent") };
+  if (value >= 80) return { key: "passed", className: "passed", label: t("passed") };
+  return { key: "retakeRequired", className: "retake", label: t("retakeRequired") };
+}
+
+function resultAction(result) {
+  return Number(result?.score || 0) < 80 ? t("retakeHint") : t("standardHint");
+}
+
 function buildClientResult(body) {
   const details = gradeAnswers(state.questions, body.answers, body.questionIds);
   const correct = details.filter((item) => item.isCorrect).length;
@@ -282,6 +317,7 @@ function setLanguage(lang) {
   $$("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
   });
+  $("#userName")?.setAttribute("placeholder", t("namePlaceholder"));
   renderAll();
 }
 
@@ -416,12 +452,17 @@ function renderQuestion() {
 
   const question = state.activeQuestions[state.currentIndex];
   const selected = state.answers[question.id] || [];
+  const category = localized(question.category) || "General";
   area.innerHTML = `
     <article class="question-card">
       <div class="question-top">
         <div>
           <p class="eyebrow">${t("question")} ${state.currentIndex + 1}</p>
           <h2>${escapeHtml(localized(question.prompt))}</h2>
+          <div class="question-meta">
+            <span>${t("typeLabel")}: ${question.type === "multiple" ? t("multiple") : t("single")}</span>
+            <span>${t("chapterLabel")}: ${escapeHtml(category)}</span>
+          </div>
         </div>
         <span class="pill">${question.type === "multiple" ? t("multiple") : t("single")}</span>
       </div>
@@ -485,6 +526,12 @@ function moveQuestion(direction) {
 }
 
 async function submitExam() {
+  const testerName = $("#userName").value.trim();
+  if (!testerName) {
+    window.alert(t("nameRequired"));
+    $("#userName").focus();
+    return;
+  }
   const missing = state.activeQuestions.filter((question) => !state.answers[question.id]?.length);
   if (missing.length && !window.confirm(t("unanswered"))) return;
 
@@ -493,7 +540,7 @@ async function submitExam() {
   const payload = await api("/api/results", {
     method: "POST",
     body: JSON.stringify({
-      name: $("#userName").value || t("guest"),
+      name: testerName,
       mode: state.mode,
       questionIds: state.activeQuestions.map((question) => question.id),
       answers,
@@ -509,17 +556,21 @@ function renderResult(result) {
   const panel = $("#resultPanel");
   const detailById = new Map((result.details || []).map((item) => [item.questionId, item]));
   const wrongCount = (result.details || []).filter((item) => !item.isCorrect).length;
+  const level = resultLevel(result.score);
   panel.hidden = false;
   panel.innerHTML = `
     <div class="result-score">
       <strong>${result.score}%</strong>
       <div>
-        <b>${t("score")}: ${result.correct}/${result.total}</b>
-        <span>${t("duration")}: ${formatDuration(result.durationSeconds || 0)}</span>
+        <b>${t("tester")}: ${escapeHtml(result.name || t("guest"))}</b>
+        <span>${t("testTime")}: ${new Date(result.submittedAt).toLocaleString()}</span>
+        <span>${t("score")}: ${result.correct}/${result.total} · ${t("duration")}: ${formatDuration(result.durationSeconds || 0)}</span>
+        <span class="level-badge ${level.className}">${t("resultLevel")}: ${level.label}</span>
+        <span>${resultAction(result)}</span>
       </div>
     </div>
     <div class="review-actions">
-      <button class="btn secondary" data-redo-session><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
+      <button class="btn ${result.score < 80 ? "primary" : "secondary"}" data-redo-session><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
       <button class="btn primary" data-review-wrong ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")} (${wrongCount})</span></button>
     </div>
     ${state.activeQuestions.map((question, index) => {
@@ -554,6 +605,15 @@ function redoSession() {
   setView("exam");
 }
 
+function redoFromResult(result) {
+  const ids = (result.details || []).map((item) => item.questionId);
+  const questions = ids.map((id) => state.questions.find((question) => question.id === id)).filter(Boolean);
+  state.mode = normalizeMode(result.mode);
+  state.activeQuestions = questions.length ? questions : [...state.questions];
+  syncModeTabs();
+  redoSession();
+}
+
 function startWrongReview(result) {
   const wrongIds = (result.details || [])
     .filter((item) => !item.isCorrect)
@@ -577,11 +637,15 @@ function startWrongReview(result) {
 }
 
 function renderBank() {
+  renderCategoryOptions();
   const query = $("#searchInput").value.trim().toLowerCase();
   const type = $("#typeFilter")?.value || "all";
+  const categoryFilter = $("#categoryFilter")?.value || "all";
   const list = $("#bankList");
   const filtered = state.questions.filter((question) => {
     if (type !== "all" && question.type !== type) return false;
+    const category = localized(question.category) || "General";
+    if (categoryFilter !== "all" && category !== categoryFilter) return false;
     const text = [
       localized(question.category),
       localized(question.prompt),
@@ -595,13 +659,29 @@ function renderBank() {
     <article class="bank-card">
       <h3>${index + 1}. ${escapeHtml(localized(question.prompt))}</h3>
       <footer>
-        <span>${escapeHtml(localized(question.category))} · ${question.difficulty || "medium"}</span>
+        <span>${t("chapterLabel")}: ${escapeHtml(localized(question.category))} · ${question.difficulty || "medium"}</span>
         <span class="answer-tag">${t("correctAnswer")}: ${(question.answer || []).join(", ")}</span>
       </footer>
       <p>${t("sopLocation")}: ${escapeHtml(localized(question.sopLocation))}</p>
       <p>${t("source")}: ${escapeHtml(localized(question.source))}</p>
     </article>
   `).join("") : `<div class="empty">${t("noQuestions")}</div>`;
+}
+
+function renderCategoryOptions() {
+  const select = $("#categoryFilter");
+  if (!select) return;
+  const selected = select.value || "all";
+  const categories = [...state.questions.reduce((set, question) => {
+    set.add(localized(question.category) || "General");
+    return set;
+  }, new Set())].sort((a, b) => a.localeCompare(b, state.lang === "zh" ? "zh-CN" : "en"));
+  const nextValue = selected === "all" || categories.includes(selected) ? selected : "all";
+  select.innerHTML = `
+    <option value="all">${t("chapterAll")}</option>
+    ${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}
+  `;
+  select.value = nextValue;
 }
 
 async function saveBank() {
@@ -653,20 +733,29 @@ function renderResults() {
   const list = $("#resultsList");
   list.innerHTML = state.results.length ? state.results.map((result) => {
     const wrongCount = (result.details || []).filter((item) => !item.isCorrect).length;
+    const level = resultLevel(result.score);
     return `
     <article class="result-row">
       <div>
-        <strong>${escapeHtml(result.name || t("guest"))}</strong>
-        <span>${new Date(result.submittedAt).toLocaleString()} · ${modeLabel(result.mode)}</span>
+        <strong>${t("tester")}: ${escapeHtml(result.name || t("guest"))}</strong>
+        <span>${t("testTime")}: ${new Date(result.submittedAt).toLocaleString()} · ${modeLabel(result.mode)}</span>
       </div>
       <div class="score-badge">${result.score}%</div>
       <span>${result.correct}/${result.total}<small>${t("wrongCount")}: ${wrongCount}</small></span>
+      <span class="level-badge ${level.className}">${level.label}</span>
       <div class="row-actions">
+        <button class="btn ${result.score < 80 ? "primary" : "secondary"} small" data-redo-result="${escapeHtml(result.id)}"><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
         <button class="btn secondary small" data-review-result="${escapeHtml(result.id)}" ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")}</span></button>
       </div>
     </article>
   `;
   }).join("") : `<div class="empty">${t("noResults")}</div>`;
+  $$("[data-redo-result]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const result = state.results.find((item) => item.id === button.dataset.redoResult);
+      if (result) redoFromResult(result);
+    });
+  });
   $$("[data-review-result]").forEach((button) => {
     button.addEventListener("click", () => {
       const result = state.results.find((item) => item.id === button.dataset.reviewResult);
@@ -681,26 +770,22 @@ function exportResults() {
     window.alert(t("noExportResults"));
     return;
   }
-  const headers = [
-    "submittedAt",
-    "name",
-    "mode",
-    "score",
-    "correct",
-    "total",
-    "durationSeconds",
-    "wrongCount",
-    "wrongQuestionIds"
-  ];
+  const headers = state.lang === "zh"
+    ? ["答题时间", "答题人", "模式", "成绩等级", "答题分数", "正确率", "正确数", "总题数", "做题时长", "做题时长(秒)", "错题数", "错题ID"]
+    : ["Submitted At", "Tester", "Mode", "Result Level", "Score", "Accuracy", "Correct", "Total", "Duration", "Duration Seconds", "Wrong Count", "Wrong Question IDs"];
   const rows = state.results.map((result) => {
     const wrongIds = (result.details || []).filter((item) => !item.isCorrect).map((item) => item.questionId);
+    const level = resultLevel(result.score);
     return [
       result.submittedAt || "",
       result.name || t("guest"),
       modeLabel(result.mode),
+      level.label,
       result.score ?? "",
+      `${result.score ?? 0}%`,
       result.correct ?? "",
       result.total ?? "",
+      formatDuration(Number(result.durationSeconds || 0)),
       result.durationSeconds ?? "",
       wrongIds.length,
       wrongIds.join(" ")
@@ -755,6 +840,7 @@ function bindEvents() {
   $("#submitExam").addEventListener("click", submitExam);
   $("#searchInput").addEventListener("input", renderBank);
   $("#typeFilter").addEventListener("change", renderBank);
+  $("#categoryFilter").addEventListener("change", renderBank);
   $("#saveBank").addEventListener("click", saveBank);
   $("#exportBank").addEventListener("click", exportBank);
   $("#exportResults").addEventListener("click", exportResults);

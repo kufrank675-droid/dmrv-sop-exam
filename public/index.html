@@ -53,8 +53,8 @@
           </div>
           <div class="top-actions">
             <label class="field compact">
-              <span data-i18n="nameLabel">姓名</span>
-              <input id="userName" name="exam-user-name" type="text" autocomplete="off" placeholder="Guest" />
+              <span data-i18n="nameLabel">测试者姓名</span>
+              <input id="userName" name="exam-user-name" type="text" autocomplete="off" required placeholder="请输入姓名" />
             </label>
             <div class="segmented" role="group" aria-label="Language">
               <button class="segment is-active" data-lang="zh">中</button>
@@ -171,6 +171,12 @@
                 <option value="all" data-i18n="typeAll">全部</option>
                 <option value="single" data-i18n="single">单选</option>
                 <option value="multiple" data-i18n="multiple">多选</option>
+              </select>
+            </label>
+            <label class="field select-field wide">
+              <span data-i18n="chapterLabel">章节</span>
+              <select id="categoryFilter" name="question-category-filter">
+                <option value="all" data-i18n="chapterAll">全部章节</option>
               </select>
             </label>
             <label class="field">
