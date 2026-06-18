@@ -46,6 +46,12 @@ const i18n = {
     exportResults: "导出成绩",
     resultsEyebrow: "审计留痕",
     resultsTitle: "最近成绩记录",
+    adminSummary: "管理汇总",
+    avgAccuracy: "平均正确率",
+    avgCorrectCount: "平均正确数量",
+    excellentCount: "优秀人数",
+    passedCount: "及格人数",
+    retakeCount: "需重做人数",
     refresh: "刷新",
     single: "单选",
     multiple: "多选",
@@ -71,6 +77,7 @@ const i18n = {
     tester: "答题人",
     score: "得分",
     accuracy: "正确率",
+    correctCount: "正确数量",
     resultLevel: "成绩等级",
     excellent: "优秀",
     passed: "及格",
@@ -141,6 +148,12 @@ const i18n = {
     exportResults: "Export Results",
     resultsEyebrow: "Audit Trail",
     resultsTitle: "Recent Results",
+    adminSummary: "Admin Summary",
+    avgAccuracy: "Average Accuracy",
+    avgCorrectCount: "Average Correct",
+    excellentCount: "Excellent Count",
+    passedCount: "Passed Count",
+    retakeCount: "Retake Count",
     refresh: "Refresh",
     single: "Single Choice",
     multiple: "Multiple Choice",
@@ -166,6 +179,7 @@ const i18n = {
     tester: "Tester",
     score: "Score",
     accuracy: "Accuracy",
+    correctCount: "Correct Count",
     resultLevel: "Result Level",
     excellent: "Excellent",
     passed: "Passed",
@@ -862,6 +876,7 @@ async function refreshResults() {
 }
 
 function renderResults() {
+  renderResultsSummary();
   const list = $("#resultsList");
   list.innerHTML = state.results.length ? state.results.map((result) => {
     const wrongCount = (result.details || []).filter((item) => !item.isCorrect).length;
@@ -872,8 +887,8 @@ function renderResults() {
         <strong>${t("tester")}: ${escapeHtml(result.name || t("guest"))}</strong>
         <span>${t("testTime")}: ${new Date(result.submittedAt).toLocaleString()} · ${modeLabel(result.mode)}</span>
       </div>
-      <div class="score-badge">${result.score}%</div>
-      <span>${result.correct}/${result.total}<small>${t("wrongCount")}: ${wrongCount}</small></span>
+      <div class="score-badge"><small>${t("accuracy")}</small>${result.score}%</div>
+      <span>${t("correctCount")}: ${result.correct}/${result.total}<small>${t("wrongCount")}: ${wrongCount}</small></span>
       <span class="level-badge ${level.className}">${level.label}</span>
       <div class="row-actions">
         <button class="btn ${result.score < 80 ? "primary" : "secondary"} small" data-redo-result="${escapeHtml(result.id)}"><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
@@ -895,6 +910,48 @@ function renderResults() {
     });
   });
   renderIcons();
+}
+
+function renderResultsSummary() {
+  const summary = $("#resultsSummary");
+  if (!summary) return;
+  if (!state.results.length) {
+    summary.innerHTML = `<div class="empty compact">${t("noResults")}</div>`;
+    return;
+  }
+  const totalRecords = state.results.length;
+  const avgAccuracy = Math.round(state.results.reduce((sum, result) => sum + Number(result.score || 0), 0) / totalRecords);
+  const avgCorrect = state.results.reduce((sum, result) => sum + Number(result.correct || 0), 0) / totalRecords;
+  const excellent = state.results.filter((result) => Number(result.score || 0) >= 90).length;
+  const passed = state.results.filter((result) => Number(result.score || 0) >= 80 && Number(result.score || 0) < 90).length;
+  const retake = state.results.filter((result) => Number(result.score || 0) < 80).length;
+
+  summary.innerHTML = `
+    <article>
+      <span>${t("metricRecords")}</span>
+      <strong>${totalRecords}</strong>
+    </article>
+    <article>
+      <span>${t("avgAccuracy")}</span>
+      <strong>${avgAccuracy}%</strong>
+    </article>
+    <article>
+      <span>${t("avgCorrectCount")}</span>
+      <strong>${avgCorrect.toFixed(1)}</strong>
+    </article>
+    <article>
+      <span>${t("excellentCount")}</span>
+      <strong>${excellent}</strong>
+    </article>
+    <article>
+      <span>${t("passedCount")}</span>
+      <strong>${passed}</strong>
+    </article>
+    <article>
+      <span>${t("retakeCount")}</span>
+      <strong>${retake}</strong>
+    </article>
+  `;
 }
 
 function exportResults() {
