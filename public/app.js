@@ -27,6 +27,7 @@ const i18n = {
     importBank: "导入题库",
     modePractice: "练习",
     modeExam: "考试",
+    modeReview: "错题复盘",
     prev: "上一题",
     next: "下一题",
     submit: "提交",
@@ -38,6 +39,7 @@ const i18n = {
     typeLabel: "题型",
     typeAll: "全部",
     exportBank: "导出",
+    exportResults: "导出成绩",
     resultsEyebrow: "审计留痕",
     resultsTitle: "最近成绩记录",
     refresh: "刷新",
@@ -57,13 +59,18 @@ const i18n = {
     submitted: "已提交",
     noQuestions: "暂无题目，请先导入题库。",
     noResults: "暂无成绩记录。",
+    noExportResults: "暂无成绩可导出。",
+    noWrongQuestions: "本次没有错题。",
     saved: "题库已保存。",
     imported: "题库已导入，请点击保存。",
     importInvalid: "导入失败：JSON 必须是数组，或包含 questions 数组。",
     unanswered: "还有题目未作答，仍要提交吗？",
     langName: "中文",
     guest: "访客",
-    duration: "用时"
+    duration: "用时",
+    redo: "重做",
+    reviewWrong: "错题复盘",
+    wrongCount: "错题"
   },
   en: {
     brandSubtitle: "Online Assessment Bank",
@@ -93,6 +100,7 @@ const i18n = {
     importBank: "Import Bank",
     modePractice: "Practice",
     modeExam: "Exam",
+    modeReview: "Wrong Review",
     prev: "Previous",
     next: "Next",
     submit: "Submit",
@@ -104,6 +112,7 @@ const i18n = {
     typeLabel: "Type",
     typeAll: "All",
     exportBank: "Export",
+    exportResults: "Export Results",
     resultsEyebrow: "Audit Trail",
     resultsTitle: "Recent Results",
     refresh: "Refresh",
@@ -123,13 +132,18 @@ const i18n = {
     submitted: "Submitted",
     noQuestions: "No questions yet. Import a question bank first.",
     noResults: "No result records yet.",
+    noExportResults: "No results to export.",
+    noWrongQuestions: "No wrong answers in this result.",
     saved: "Question bank saved.",
     imported: "Question bank imported. Click save to persist it.",
     importInvalid: "Import failed: JSON must be an array or contain a questions array.",
     unanswered: "Some questions are unanswered. Submit anyway?",
     langName: "English",
     guest: "Guest",
-    duration: "Duration"
+    duration: "Duration",
+    redo: "Redo",
+    reviewWrong: "Review Wrong",
+    wrongCount: "Wrong"
   }
 };
 
@@ -207,14 +221,22 @@ function readLocalResults() {
   }
 }
 
+function normalizeMode(mode) {
+  return ["practice", "exam", "review"].includes(mode) ? mode : "exam";
+}
+
+function modeLabel(mode) {
+  return mode === "practice" ? t("modePractice") : mode === "review" ? t("modeReview") : t("modeExam");
+}
+
 function buildClientResult(body) {
-  const details = gradeAnswers(state.questions, body.answers);
+  const details = gradeAnswers(state.questions, body.answers, body.questionIds);
   const correct = details.filter((item) => item.isCorrect).length;
   const total = details.length;
   return {
     id: `local-${Date.now()}`,
     name: String(body.name || "Guest").trim().slice(0, 80),
-    mode: body.mode === "practice" ? "practice" : "exam",
+    mode: normalizeMode(body.mode),
     submittedAt: new Date().toISOString(),
     durationSeconds: Number(body.durationSeconds || 0),
     total,
@@ -224,10 +246,12 @@ function buildClientResult(body) {
   };
 }
 
-function gradeAnswers(questions, answers) {
+function gradeAnswers(questions, answers, questionIds) {
   const byId = new Map(questions.map((question) => [question.id, question]));
-  return Object.entries(answers || {}).map(([questionId, selected]) => {
+  const ids = Array.isArray(questionIds) && questionIds.length ? questionIds : Object.keys(answers || {});
+  return ids.map((questionId) => {
     const question = byId.get(questionId);
+    const selected = answers?.[questionId] || [];
     const selectedAnswers = Array.isArray(selected) ? selected : [selected].filter(Boolean);
     const correctAnswers = question?.answer || [];
     return {
@@ -272,8 +296,12 @@ function setView(view) {
 
 function setMode(mode) {
   state.mode = mode;
-  $$(".tab").forEach((button) => button.classList.toggle("is-active", button.dataset.mode === mode));
+  syncModeTabs();
   startSession(mode, true);
+}
+
+function syncModeTabs() {
+  $$(".tab").forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
 }
 
 function shuffle(items) {
@@ -467,6 +495,7 @@ async function submitExam() {
     body: JSON.stringify({
       name: $("#userName").value || t("guest"),
       mode: state.mode,
+      questionIds: state.activeQuestions.map((question) => question.id),
       answers,
       durationSeconds: elapsedSeconds()
     })
@@ -479,6 +508,7 @@ async function submitExam() {
 function renderResult(result) {
   const panel = $("#resultPanel");
   const detailById = new Map((result.details || []).map((item) => [item.questionId, item]));
+  const wrongCount = (result.details || []).filter((item) => !item.isCorrect).length;
   panel.hidden = false;
   panel.innerHTML = `
     <div class="result-score">
@@ -487,6 +517,10 @@ function renderResult(result) {
         <b>${t("score")}: ${result.correct}/${result.total}</b>
         <span>${t("duration")}: ${formatDuration(result.durationSeconds || 0)}</span>
       </div>
+    </div>
+    <div class="review-actions">
+      <button class="btn secondary" data-redo-session><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>${t("redo")}</span></button>
+      <button class="btn primary" data-review-wrong ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")} (${wrongCount})</span></button>
     </div>
     ${state.activeQuestions.map((question, index) => {
       const detail = detailById.get(question.id);
@@ -504,6 +538,42 @@ function renderResult(result) {
       `;
     }).join("")}
   `;
+  panel.querySelector("[data-redo-session]")?.addEventListener("click", redoSession);
+  panel.querySelector("[data-review-wrong]")?.addEventListener("click", () => startWrongReview(result));
+  renderIcons();
+}
+
+function redoSession() {
+  state.currentIndex = 0;
+  state.answers = {};
+  state.startedAt = Date.now();
+  $("#resultPanel").hidden = true;
+  restartTimer();
+  renderQuestion();
+  renderStats();
+  setView("exam");
+}
+
+function startWrongReview(result) {
+  const wrongIds = (result.details || [])
+    .filter((item) => !item.isCorrect)
+    .map((item) => item.questionId);
+  const questions = wrongIds.map((id) => state.questions.find((question) => question.id === id)).filter(Boolean);
+  if (!questions.length) {
+    window.alert(t("noWrongQuestions"));
+    return;
+  }
+  state.mode = "review";
+  state.activeQuestions = questions;
+  state.currentIndex = 0;
+  state.answers = {};
+  state.startedAt = Date.now();
+  $("#resultPanel").hidden = true;
+  syncModeTabs();
+  restartTimer();
+  renderQuestion();
+  renderStats();
+  setView("exam");
 }
 
 function renderBank() {
@@ -581,16 +651,74 @@ async function refreshResults() {
 
 function renderResults() {
   const list = $("#resultsList");
-  list.innerHTML = state.results.length ? state.results.map((result) => `
+  list.innerHTML = state.results.length ? state.results.map((result) => {
+    const wrongCount = (result.details || []).filter((item) => !item.isCorrect).length;
+    return `
     <article class="result-row">
       <div>
         <strong>${escapeHtml(result.name || t("guest"))}</strong>
-        <span>${new Date(result.submittedAt).toLocaleString()} · ${result.mode}</span>
+        <span>${new Date(result.submittedAt).toLocaleString()} · ${modeLabel(result.mode)}</span>
       </div>
       <div class="score-badge">${result.score}%</div>
-      <span>${result.correct}/${result.total}</span>
+      <span>${result.correct}/${result.total}<small>${t("wrongCount")}: ${wrongCount}</small></span>
+      <div class="row-actions">
+        <button class="btn secondary small" data-review-result="${escapeHtml(result.id)}" ${wrongCount ? "" : "disabled"}><i data-lucide="list-x" aria-hidden="true"></i><span>${t("reviewWrong")}</span></button>
+      </div>
     </article>
-  `).join("") : `<div class="empty">${t("noResults")}</div>`;
+  `;
+  }).join("") : `<div class="empty">${t("noResults")}</div>`;
+  $$("[data-review-result]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const result = state.results.find((item) => item.id === button.dataset.reviewResult);
+      if (result) startWrongReview(result);
+    });
+  });
+  renderIcons();
+}
+
+function exportResults() {
+  if (!state.results.length) {
+    window.alert(t("noExportResults"));
+    return;
+  }
+  const headers = [
+    "submittedAt",
+    "name",
+    "mode",
+    "score",
+    "correct",
+    "total",
+    "durationSeconds",
+    "wrongCount",
+    "wrongQuestionIds"
+  ];
+  const rows = state.results.map((result) => {
+    const wrongIds = (result.details || []).filter((item) => !item.isCorrect).map((item) => item.questionId);
+    return [
+      result.submittedAt || "",
+      result.name || t("guest"),
+      modeLabel(result.mode),
+      result.score ?? "",
+      result.correct ?? "",
+      result.total ?? "",
+      result.durationSeconds ?? "",
+      wrongIds.length,
+      wrongIds.join(" ")
+    ];
+  });
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `dmrv-sop-results-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
 function renderAll() {
@@ -629,6 +757,7 @@ function bindEvents() {
   $("#typeFilter").addEventListener("change", renderBank);
   $("#saveBank").addEventListener("click", saveBank);
   $("#exportBank").addEventListener("click", exportBank);
+  $("#exportResults").addEventListener("click", exportResults);
   $("#refreshResults").addEventListener("click", refreshResults);
   $("#importFile").addEventListener("change", (event) => {
     const [file] = event.target.files;

@@ -95,10 +95,16 @@ function normalizeQuestion(question) {
   };
 }
 
-function grade(questions, answers) {
+function normalizeMode(mode) {
+  return ["practice", "exam", "review"].includes(mode) ? mode : "exam";
+}
+
+function grade(questions, answers, questionIds) {
   const byId = new Map(questions.map((question) => [question.id, question]));
-  const details = Object.entries(answers || {}).map(([questionId, selected]) => {
+  const ids = Array.isArray(questionIds) && questionIds.length ? questionIds : Object.keys(answers || {});
+  const details = ids.map((questionId) => {
     const question = byId.get(questionId);
+    const selected = answers?.[questionId] || [];
     const selectedAnswers = Array.isArray(selected) ? selected : [selected].filter(Boolean);
     const correctAnswers = question?.answer || [];
     const selectedKey = [...selectedAnswers].sort().join("|");
@@ -147,10 +153,10 @@ async function handleApi(req, res, url) {
     const result = {
       id: crypto.randomUUID(),
       name: String(body.name || "Guest").trim().slice(0, 80),
-      mode: body.mode === "practice" ? "practice" : "exam",
+      mode: normalizeMode(body.mode),
       submittedAt: new Date().toISOString(),
       durationSeconds: Number(body.durationSeconds || 0),
-      ...grade(questions, body.answers)
+      ...grade(questions, body.answers, body.questionIds)
     };
     const results = await readJson(resultsFile, []);
     results.push(result);
