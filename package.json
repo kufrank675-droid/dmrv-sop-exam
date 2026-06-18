@@ -1,0 +1,15 @@
+{
+  "name": "dmrv-sop-exam",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bilingual SOP question bank and online assessment platform for DMRV integration.",
+  "scripts": {
+    "build:static": "node scripts/build-static.js",
+    "import:questions": "node scripts/import-question-bank.js",
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
