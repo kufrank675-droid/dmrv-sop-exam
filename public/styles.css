@@ -511,6 +511,15 @@ a:focus-visible {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.practice-filter {
+  margin-right: auto;
+}
+
+.practice-filter.is-muted {
+  opacity: 0.56;
 }
 
 .exam-meta {
@@ -626,6 +635,113 @@ a:focus-visible {
 .options {
   display: grid;
   gap: 10px;
+}
+
+.learning-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.learning-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.learning-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  gap: 10px;
+}
+
+.learning-grid article,
+.memory-tip,
+.diagram-step {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.learning-grid article {
+  padding: 12px;
+}
+
+.learning-grid h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.learning-grid p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.learning-diagram {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.diagram-step {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  min-height: 118px;
+  padding: 12px;
+}
+
+.diagram-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 10px;
+  height: 2px;
+  background: var(--line);
+}
+
+.diagram-step b {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.diagram-step span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.diagram-step strong {
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.memory-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  line-height: 1.6;
+}
+
+.memory-tip b {
+  flex: 0 0 auto;
+  color: var(--primary-strong);
 }
 
 .option {
@@ -951,8 +1067,18 @@ a:focus-visible {
   }
 
   .metrics,
-  .quick-grid {
+  .quick-grid,
+  .learning-grid,
+  .learning-diagram {
     grid-template-columns: 1fr;
+  }
+
+  .practice-filter {
+    margin-right: 0;
+  }
+
+  .diagram-step:not(:last-child)::after {
+    display: none;
   }
 
   .nav {

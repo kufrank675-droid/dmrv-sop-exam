@@ -41,6 +41,7 @@ const i18n = {
     typeAll: "全部",
     chapterLabel: "章节",
     chapterAll: "全部章节",
+    practiceChapter: "练习章节",
     exportBank: "导出",
     exportResults: "导出成绩",
     resultsEyebrow: "审计留痕",
@@ -54,7 +55,16 @@ const i18n = {
     pending: "未答",
     question: "题",
     correctAnswer: "正确答案",
+    yourAnswer: "你的答案",
     explanation: "解析",
+    learningDiagram: "图示",
+    memoryTip: "口诀",
+    correctFeedback: "回答正确",
+    reviewFeedback: "需要复盘",
+    diagramQuestion: "题干",
+    diagramSop: "SOP定位",
+    diagramAction: "正确动作",
+    noSelection: "未选择",
     sopLocation: "SOP位置",
     source: "来源",
     testTime: "答题时间",
@@ -126,6 +136,7 @@ const i18n = {
     typeAll: "All",
     chapterLabel: "Chapter",
     chapterAll: "All Chapters",
+    practiceChapter: "Practice Chapter",
     exportBank: "Export",
     exportResults: "Export Results",
     resultsEyebrow: "Audit Trail",
@@ -139,7 +150,16 @@ const i18n = {
     pending: "Pending",
     question: "Question",
     correctAnswer: "Correct answer",
+    yourAnswer: "Your answer",
     explanation: "Explanation",
+    learningDiagram: "Diagram",
+    memoryTip: "Memory tip",
+    correctFeedback: "Correct",
+    reviewFeedback: "Review needed",
+    diagramQuestion: "Prompt",
+    diagramSop: "SOP Location",
+    diagramAction: "Correct action",
+    noSelection: "Not selected",
     sopLocation: "SOP Location",
     source: "Source",
     testTime: "Submitted At",
@@ -180,6 +200,7 @@ const state = {
   activeQuestions: [],
   currentIndex: 0,
   answers: {},
+  practiceCategory: localStorage.getItem("dmrv-practice-category") || "all",
   startedAt: null,
   timerHandle: null
 };
@@ -338,15 +359,35 @@ function setMode(mode) {
 
 function syncModeTabs() {
   $$(".tab").forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
+  $(".practice-filter")?.classList.toggle("is-muted", state.mode !== "practice");
 }
 
 function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5);
 }
 
+function categoryValue(question) {
+  return localized(question.category) || "General";
+}
+
+function getCategories() {
+  return [...state.questions.reduce((set, question) => {
+    set.add(categoryValue(question));
+    return set;
+  }, new Set())].sort((a, b) => a.localeCompare(b, state.lang === "zh" ? "zh-CN" : "en"));
+}
+
 function startSession(mode = state.mode, reset = true) {
   state.mode = mode;
-  state.activeQuestions = mode === "exam" ? shuffle(state.questions).slice(0, Math.min(10, state.questions.length)) : [...state.questions];
+  if (mode === "exam") {
+    state.activeQuestions = shuffle(state.questions).slice(0, Math.min(10, state.questions.length));
+  } else if (mode === "practice") {
+    state.activeQuestions = state.practiceCategory === "all"
+      ? [...state.questions]
+      : state.questions.filter((question) => categoryValue(question) === state.practiceCategory);
+  } else {
+    state.activeQuestions = [...state.questions];
+  }
   if (reset) {
     state.currentIndex = 0;
     state.answers = {};
@@ -440,6 +481,7 @@ function renderDashboardDetails() {
 }
 
 function renderQuestion() {
+  renderPracticeCategoryOptions();
   const area = $("#questionArea");
   const total = state.activeQuestions.length;
   $("#progress").textContent = `${Math.min(state.currentIndex + 1, total)}/${total}`;
@@ -474,6 +516,7 @@ function renderQuestion() {
           </button>
         `).join("")}
       </div>
+      ${state.mode === "practice" && selected.length ? renderLearningPanel(question, selected) : ""}
     </article>
   `;
 
@@ -482,6 +525,85 @@ function renderQuestion() {
   });
   renderQuestionRail();
   renderIcons();
+}
+
+function renderPracticeCategoryOptions() {
+  const select = $("#practiceCategoryFilter");
+  if (!select) return;
+  const categories = getCategories();
+  const nextValue = state.practiceCategory === "all" || categories.includes(state.practiceCategory)
+    ? state.practiceCategory
+    : "all";
+  state.practiceCategory = nextValue;
+  select.innerHTML = `
+    <option value="all">${t("chapterAll")}</option>
+    ${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}
+  `;
+  select.value = nextValue;
+}
+
+function renderLearningPanel(question, selected) {
+  const detail = gradeAnswers([question], { [question.id]: selected }, [question.id])[0];
+  const correctText = answerText(question, detail.correct);
+  const selectedText = selected.length ? answerText(question, selected) : t("noSelection");
+  const diagram = buildLearningDiagram(question, correctText);
+  const mnemonic = buildMnemonic(question, detail.correct);
+  return `
+    <section class="learning-panel">
+      <div class="learning-head">
+        <span class="level-badge ${detail.isCorrect ? "excellent" : "retake"}">${detail.isCorrect ? t("correctFeedback") : t("reviewFeedback")}</span>
+        <span>${t("correctAnswer")}: ${escapeHtml(correctText)}</span>
+      </div>
+      <div class="learning-grid">
+        <article>
+          <h3>${t("yourAnswer")}</h3>
+          <p>${escapeHtml(selectedText)}</p>
+        </article>
+        <article>
+          <h3>${t("explanation")}</h3>
+          <p>${escapeHtml(localized(question.explanation))}</p>
+        </article>
+      </div>
+      <div class="learning-diagram" aria-label="${t("learningDiagram")}">
+        ${diagram.map((item, index) => `
+          <div class="diagram-step">
+            <b>${index + 1}</b>
+            <span>${escapeHtml(item.label)}</span>
+            <strong>${escapeHtml(item.value)}</strong>
+          </div>
+        `).join("")}
+      </div>
+      <div class="memory-tip">
+        <b>${t("memoryTip")}</b>
+        <span>${escapeHtml(mnemonic)}</span>
+      </div>
+    </section>
+  `;
+}
+
+function answerText(question, ids) {
+  const byId = new Map((question.options || []).map((option) => [option.id, localized(option)]));
+  return (ids || []).map((id) => `${id}. ${byId.get(id) || id}`).join(" / ");
+}
+
+function buildLearningDiagram(question, correctText) {
+  const prompt = localized(question.prompt).replace(/\s+/g, " ").slice(0, 42);
+  const sop = localized(question.sopLocation) || categoryValue(question);
+  return [
+    { label: t("diagramQuestion"), value: prompt },
+    { label: t("diagramSop"), value: sop },
+    { label: t("diagramAction"), value: correctText }
+  ];
+}
+
+function buildMnemonic(question, correctIds) {
+  const category = categoryValue(question);
+  const correctLetters = (correctIds || []).join("");
+  const action = answerText(question, correctIds).replace(/[A-Z]\.\s*/g, "").slice(0, 28);
+  if (state.lang === "en") {
+    return `Chapter first, answer ${correctLetters || "-"} next: remember "${action || category}".`;
+  }
+  return `先定位「${category}」，再记答案「${correctLetters || "-"}」：${action || "按SOP动作核对"}。`;
 }
 
 function renderQuestionRail() {
@@ -515,7 +637,7 @@ function chooseOption(question, optionId) {
     state.answers[question.id] = [optionId];
   }
   renderQuestion();
-  if (question.type === "single") autoAdvanceSingleChoice(question.id);
+  if (question.type === "single" && state.mode === "exam") autoAdvanceSingleChoice(question.id);
 }
 
 function autoAdvanceSingleChoice(questionId) {
@@ -685,10 +807,7 @@ function renderCategoryOptions() {
   const select = $("#categoryFilter");
   if (!select) return;
   const selected = select.value || "all";
-  const categories = [...state.questions.reduce((set, question) => {
-    set.add(localized(question.category) || "General");
-    return set;
-  }, new Set())].sort((a, b) => a.localeCompare(b, state.lang === "zh" ? "zh-CN" : "en"));
+  const categories = getCategories();
   const nextValue = selected === "all" || categories.includes(selected) ? selected : "all";
   select.innerHTML = `
     <option value="all">${t("chapterAll")}</option>
@@ -854,6 +973,11 @@ function bindEvents() {
   $("#searchInput").addEventListener("input", renderBank);
   $("#typeFilter").addEventListener("change", renderBank);
   $("#categoryFilter").addEventListener("change", renderBank);
+  $("#practiceCategoryFilter").addEventListener("change", (event) => {
+    state.practiceCategory = event.target.value;
+    localStorage.setItem("dmrv-practice-category", state.practiceCategory);
+    setMode("practice");
+  });
   $("#saveBank").addEventListener("click", saveBank);
   $("#exportBank").addEventListener("click", exportBank);
   $("#exportResults").addEventListener("click", exportResults);

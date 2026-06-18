@@ -135,6 +135,12 @@
               <button class="tab is-active" data-mode="practice" data-i18n="modePractice">练习</button>
               <button class="tab" data-mode="exam" data-i18n="modeExam">考试</button>
             </div>
+            <label class="field select-field practice-filter">
+              <span data-i18n="practiceChapter">练习章节</span>
+              <select id="practiceCategoryFilter" name="practice-category-filter">
+                <option value="all" data-i18n="chapterAll">全部章节</option>
+              </select>
+            </label>
             <div class="exam-meta">
               <span><i data-lucide="clock-3" aria-hidden="true"></i><b id="timer">00:00</b></span>
               <span><i data-lucide="list-checks" aria-hidden="true"></i><b id="progress">0/0</b></span>
